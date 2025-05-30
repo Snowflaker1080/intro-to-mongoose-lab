@@ -7,7 +7,9 @@ const customerSchema = new mongoose.Schema ({
     },
     age: {
         type: Number,
-        required: true
+        required: true,
+         min: 0,
+         max: 130
     }
 });
 

@@ -1,6 +1,9 @@
 require("dotenv").config(); // Loads environment variables from .env file into process.env.
 const mongoose = require("mongoose"); //Imports the Mongoose library to connect and interact with MongoDB.
 
+const prompt = require("prompt-sync")({ sigint: true}); //Loads the prompt-sync package for user input in terminal.
+const Customer = require("./models/customer"); // Customer model import from models directory.
+
 mongoose.connect(process.env.MONGODB_URI); // Connects to the MongoDB database using the URI stored in the .env file.
 
 mongoose.connection.on("connected", () => {
@@ -11,43 +14,41 @@ mongoose.connection.on("error", (err) => {
   console.error("MongoDB connection error:", err);
 });
 
-const prompt = require("prompt-sync")(); //Loads the prompt-sync package for user input in terminal.
-const Customer = require("./models/customer"); // Customer model import from models directory.
+async function mainMenu() {
+  while (true) {
+    console.log("\nWelcome to the CRM\n");
+    console.log("What would you like to do?\n");
+    console.log("  1. Create a customer");
+    console.log("  2. View all customers");
+    console.log("  3. Update a customer");
+    console.log("  4. Delete a customer");
+    console.log("  5. Quit");
 
-async function mainMenu() { // Defines the main menu function
-  console.log("\nWelcome to the CRM\n");
-  console.log("What would you like to do?\n");
-  console.log("  1. Create a customer");
-  console.log("  2. View all customers");
-  console.log("  3. Update a customer");
-  console.log("  4. Delete a customer");
-  console.log("  5. Quit");
+    const choice = prompt("\nNumber of action to run: "); // Takes user input to determine which action to perform.
+    console.log("User input:", choice);
 
-  const choice = prompt("\nNumber of action to run: "); // Takes user input to determine which action to perform.
-
-  switch (choice) { // Starts a switch block based on user input choice.
-    case "1":
-      await createCustomer();
-      break;
-    case "2":
-      await viewCustomers();
-      prompt("\nPress Enter to return to menu..."); // trying to resolve issue knowing database has no customers.
-      break;
-    case "3":
-      await updateCustomer();
-      break;
-    case "4":
-      await deleteCustomer();
-      break;
-    case "5":
-      console.log("Exiting...");
-      mongoose.connection.close(); // User inputs 5 to 'Quit', command safely closes the connection to your MongoDB database
-      return;
-    default:
-      console.log("Invalid option.");
+    switch (choice){ // Starts a switch block based on user input choice.
+      case "1":
+        await createCustomer();
+        break;
+      case "2":
+        await viewCustomers();
+        prompt("\nPress Enter to return to menu..."); // trying to resolve issue knowing database has no customers.
+        break;
+      case "3":
+        await updateCustomer();
+        break;
+      case "4":
+        await deleteCustomer();
+        break;
+      case "5":
+        console.log("Exiting...");
+        mongoose.connection.close(); // User inputs 5 to 'Quit', command safely closes the connection to your MongoDB database
+        return;
+      default:
+        console.log("Invalid option Please enter 1-5.");
+    }
   }
-
-  mainMenu(); // loop
 }
 
 async function createCustomer() {
@@ -64,7 +65,8 @@ async function createCustomer() {
   console.log("Customer created successfully."); // Creates a new customer document in MongoDB.
 }
 
-async function viewCustomers() { // Fetches all custoers from database.
+async function viewCustomers() {
+  // Fetches all custoers from database.
   const customers = await Customer.find();
   console.log("\nCustomer List:\n");
 
@@ -81,14 +83,15 @@ async function updateCustomer() {
   await viewCustomers();
   const id = prompt("Enter customer id to update: ");
   const name = prompt("New name: ");
-  const age = Number(prompt("New age: ")); //Why captial N for Number?
+  const age = Number(prompt("New age: "));
+
   if (isNaN(age)) {
     console.log("Please enter a valid number for age.");
     return;
   }
-  await Customer.findByIdAndUpdate(id, { name, age }); //Why capital C for customer? 
+  await Customer.findByIdAndUpdate(id, { name, age });
   console.log("Customer updated.");
-} 
+}
 // Updates the customer record by ID. Customer is capitalised because it’s the name of the Mongoose model, following convention that model names are PascalCase.
 async function deleteCustomer() {
   await viewCustomers();
@@ -97,7 +100,14 @@ async function deleteCustomer() {
   console.log("Customer deleted.");
 }
 
-mainMenu(); // start app
+(async () => {
+  try {
+    await mainMenu();
+  } catch (err) {
+    console.error("An error occurred:", err);
+    mongoose.connection.close();
+  }
+})();
 
 // const username = prompt('What is your name? ');
 
