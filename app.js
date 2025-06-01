@@ -1,7 +1,7 @@
 require("dotenv").config(); // Loads environment variables from .env file into process.env.
 const mongoose = require("mongoose"); //Imports the Mongoose library to connect and interact with MongoDB.
 
-const prompt = require("prompt-sync")({ sigint: true}); //Loads the prompt-sync package for user input in terminal.
+const prompt = require("prompt-sync")({ sigint: true }); //Loads the prompt-sync package for user input in terminal.
 const Customer = require("./models/customer"); // Customer model import from models directory.
 
 mongoose.connect(process.env.MONGODB_URI); // Connects to the MongoDB database using the URI stored in the .env file.
@@ -16,7 +16,7 @@ mongoose.connection.on("error", (err) => {
 
 async function mainMenu() {
   while (true) {
-    console.log("\nWelcome to the CRM\n");
+    console.log("\nWelcome to the best CRM ever\n");
     console.log("What would you like to do?\n");
     console.log("  1. Create a customer");
     console.log("  2. View all customers");
@@ -27,7 +27,7 @@ async function mainMenu() {
     const choice = prompt("\nNumber of action to run: "); // Takes user input to determine which action to perform.
     console.log("User input:", choice);
 
-    switch (choice){ // Starts a switch block based on user input choice.
+    switch (choice) { // Starts a switch block based on user input choice.
       case "1":
         await createCustomer();
         break;
